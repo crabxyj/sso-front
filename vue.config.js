@@ -9,7 +9,7 @@ module.exports = {
         // open:true,//配置自动启动浏览器
         proxy: {
             '/api/*': {
-                target: 'http://localhost:8081', // target host
+                target: 'http://localhost:8080', // target host
                 ws: true, // proxy websockets 
                 changeOrigin: true, // needed for virtual hosted sites
                 secure: false,

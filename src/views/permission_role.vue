@@ -7,8 +7,8 @@
         </div>
         <div class="container">
             <div class="handle-box">
-                <el-button type="primary" icon="el-icon-refresh"  @click="loadPage()"></el-button>
-                <el-button type="primary" icon="el-icon-plus"  @click="addRoleShow()">添加</el-button>
+                <el-button type="primary" icon="el-icon-refresh" @click="loadPage()"></el-button>
+                <el-button type="primary" icon="el-icon-plus" @click="addRoleShow()">添加</el-button>
                 <div style="float: right;">
                     <el-select v-model="select_cate" placeholder="筛选类型" class="handle-select mr10">
                         <el-option v-for="item in editableTabs" :key="item.id" :label="item.title" :value='item.title'></el-option>
@@ -17,13 +17,19 @@
                     <el-button type="primary" icon="search" @click="search">搜索</el-button>
                 </div>
             </div>
-            <el-table :data="data" class="table" ref="multipleTable" :height="tableHeight" border highlight-current-row>
-                <el-table-column prop="roleName" label="角色名" width="200"></el-table-column>
-                <el-table-column label="操作" min-width="220">
-                    <template slot-scope="scope">
-                        <el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
+            <el-table v-loading="loading" :data="tableData" class="table"  border highlight-current-row>
+                <el-table-column label="场景名称" prop="name"></el-table-column>
+                <template>
+                    <el-table-column :label="item.label" v-for="item in tablehead" :key="item.id">
+                        <template slot="header" slot-scope="scope">
+                            <el-checkbox v-model="tableheadCheck[scope.column.property]" @change="modify(null,scope.column.property)"></el-checkbox>
+                            <span v-text="label"></span>
+                        </template>
+                        <template slot-scope="scope">
+                            <el-checkbox v-model="scope.row[scope.column.property]" @change="modify(scope.row,scope.column.property)"></el-checkbox>
+                        </template>
+                    </el-table-column>
+                </template>
             </el-table>
             <div class="pagination">
                 <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange"
@@ -58,8 +64,11 @@ export default {
     name: 'basetable',
     data () {
         return {
-            editableTabs: [],
+            loading: false,
+            tablehead: [],
+            tableheadCheck: {},
             tableData: [],
+            editableTabs: [],
             tableHeight: window.innerHeight - 350,
             pagination: {
                 page: 1,
@@ -91,14 +100,14 @@ export default {
         }
     },
     methods: {
-        loadPage () {
+        loadTableHeader () {
             var data = {
                 page: this.pagination.page,
                 pageSize: this.pagination.pageSize
             };
             let _this = this;
             this.$myhttp.myGet(
-                'sso', 'roleLoadPage', data, res => {
+                'sso', 'roleLoad', data, res => {
                     if (res.code !== 0) {
                         _this.$message({
                             message: res.msg,
@@ -108,6 +117,20 @@ export default {
                     }
                     _this.pagination.totalCount = res.r.totalCount;
                     _this.tableData = res.r.rs;
+                });
+        },
+        loadPage () {
+            let _this = this;
+            this.$myhttp.myGet(
+                'sso', 'portUrls', {}, res => {
+                    if (res.code !== 0) {
+                        _this.$message({
+                            message: res.msg,
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    console.log(res);
                 });
         },
         // 分页导航
@@ -180,7 +203,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
     .handle-box {
         margin-bottom: 20px;
     }

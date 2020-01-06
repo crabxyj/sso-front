@@ -5,7 +5,7 @@ Vue.use(VueRouter)
 
 const routes = [{
     path: '/',
-    redirect: '/RoleManager'
+    redirect: '/permission_role'
 },
 {
     path: '/',
@@ -24,6 +24,12 @@ const routes = [{
         component: () => import('../views/RoleManager.vue'),
         meta: {
             title: '角色管理'
+        }
+    }, {
+        path: '/permission_role',
+        component: () => import('../views/permission_role.vue'),
+        meta: {
+            title: '接口权限管理'
         }
     }]
 }]
